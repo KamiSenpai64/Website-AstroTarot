@@ -597,7 +597,7 @@
     alt="Roata Zodiacului"
   />
   <div class="hero-title">Astro Tarot</div>
-  <div class="hero-subtitle">✦ Ghidaj Cosmic · Lecturi Sacre · Înțelepciunea Stelelor ✦</div>
+  <div class="hero-subtitle">✦ Ghidaj Cosmic djlashdlas · Lecturi Sacre · Înțelepciunea Stelelor ✦</div>
   <div class="divider-stars">✧ ✦ ✧</div>
   <p class="hero-desc">
     Bine ai venit, căutătorule. Stelele au spus întotdeauna povești — lasă cărțile să le dezvăluie pe ale tale.
@@ -633,7 +633,7 @@
     </p>
     <div class="social-grid">
       <!-- ✏️ EDITEAZĂ: Înlocuiește # cu linkurile tale reale -->
-      <a class="social-card" href="#" target="_blank">
+      <a class="social-card" href="https://youtube.com/@astro_tarot10" target="_blank">
         <div class="social-icon yt">▶</div>
         <div><div class="social-label">YouTube</div><div class="social-handle">@NumeleCanalului</div></div>
       </a>
@@ -791,14 +791,11 @@
     <p>Completează detaliile tale și te voi contacta în 24 de ore pentru a confirma ședința.</p>
     <input type="text" placeholder="Numele Tău" />
     <input type="email" placeholder="Adresa ta de Email" />
-    <select>
-      <option value="" disabled selected>Fusul orar preferat</option>
-      <option>UTC+0 — Marea Britanie / Lisabona</option>
-      <option>UTC+1 — Paris / Berlin</option>
-      <option>UTC+2 — București / Atena</option>
-      <option>UTC+3 — Moscova / Istanbul</option>
-      <option>Altul (menționează în mesaj)</option>
-    </select>
+    <label style="display:block; margin:10px 0 6px; color:#cfcfcf;">
+    Ora preferată (24h)
+    </label>
+
+    <input type="time" id="bookingTime" step="60">
     <textarea placeholder="Întrebarea sau intenția ta pentru această lectură (opțional)…"></textarea>
     <div class="price-badge" style="font-size:0.9rem; margin:0 0 18px">
       <span class="price-amount" style="font-size:1.3rem">250 €</span>
@@ -807,6 +804,24 @@
     </div>
     <!-- ✏️ EDITEAZĂ: Înlocuiește cu adresa ta de email reală -->
     <button class="btn-submit" onclick="submitBooking()">Trimite Cererea de Rezervare ✦</button>
+  </div>
+</div>
+
+<!-- ─── SUCCESS POPUP ─── -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-box">
+
+    <div style="font-size:2rem; margin-bottom:10px;">✦</div>
+
+    <h2>Cerere trimisă</h2>
+
+    <p>
+      Am primit solicitarea ta și te voi contacta în maximum 24 de ore
+      pentru confirmarea programării.
+    </p>
+
+    <button onclick="closeSuccess()">Închide</button>
+
   </div>
 </div>
 
@@ -890,6 +905,42 @@
     alert('✨ Mulțumesc! Te voi contacta în 24 de ore pentru a confirma lectura ta. Stelele te așteaptă.');
     closeModal();
   }
+
+document.addEventListener('DOMContentLoaded', () => {
+  // This list replaces the external JSON file
+  const zodiacLinks = {
+    "BERBEC": "zodiac/berbec.html",
+    "TAUR": "zodiac/taur.html",
+    "GEMENI": "zodiac/gemeni.html",
+    "RAC": "zodiac/rac.html",
+    "LEU": "zodiac/leu.html",
+    "FECIOARĂ": "zodiac/fecioara.html",
+    "BALANȚĂ": "zodiac/balanta.html",
+    "SCORPION": "zodiac/scorpion.html",
+    "SĂGETĂTOR": "zodiac/sagetator.html",
+    "CAPRICORN": "zodiac/capricorn.html",
+    "VĂRSĂTOR": "zodiac/varsator.html",
+    "PEȘTI": "zodiac/pesti.html"
+  };
+
+  const signs = document.querySelectorAll('.zodiac-sign');
+
+  signs.forEach(sign => {
+    sign.style.cursor = 'pointer';
+
+    sign.addEventListener('click', () => {
+      const name = sign.querySelector('.zodiac-name').innerText.trim();
+      const targetPage = zodiacLinks[name];
+
+      if (targetPage) {
+        window.location.href = targetPage;
+      } else {
+        console.error("No link found for: " + name);
+      }
+    });
+  });
+});
+
 </script>
 </body>
 </html>
