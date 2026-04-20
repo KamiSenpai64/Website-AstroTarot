@@ -568,6 +568,59 @@
 
     .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.7s ease, transform 0.7s ease; }
     .reveal.visible { opacity: 1; transform: none; }
+
+    /* ─── TAROT CARD 3D FLIP ─── */
+.tarot-draw-container {
+  perspective: 1000px; /* Gives the 3D depth */
+  width: 180px;
+  height: 280px;
+  margin: 30px auto 10px;
+  cursor: pointer;
+}
+
+.tarot-card {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform-style: preserve-3d;
+}
+
+.tarot-card.flipped {
+  transform: rotateY(180deg);
+  pointer-events: none; /* Stops them from clicking it again */
+}
+
+.tarot-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+}
+
+.tarot-card-front, .tarot-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 12px;
+  border: 1px solid var(--gold);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+
+.tarot-card-front {
+  background: linear-gradient(135deg, var(--deep-violet), var(--midnight));
+}
+
+.tarot-card-back {
+  background: linear-gradient(135deg, var(--royal-purple), var(--mystic));
+  transform: rotateY(180deg); /* Hidden initially */
+  padding: 15px;
+}
+
   </style>
 </head>
 <body>
@@ -604,6 +657,33 @@
     Descoperă astrologia, tarotul și ritmurile cosmice care îți modelează destinul.
   </p>
 </section>
+
+<section id="cartea-zilei" style="text-align: center; padding: 40px 24px;">
+  <div class="section-inner reveal">
+    <div class="section-label">✦ Mesajul Tău</div>
+    <h2 class="section-title">Cartea Zilei</h2>
+    
+    <div class="tarot-draw-container">
+      <div class="tarot-card" id="dailyCard" onclick="drawCard()">
+        <div class="tarot-card-inner">
+          <div class="tarot-card-front">
+            <div style="font-size: 3rem; opacity: 0.6;">🌌</div>
+          </div>
+          <div class="tarot-card-back">
+            <div id="cardIcon" style="font-size: 3.5rem; margin-bottom: 10px;">✨</div>
+            <h3 id="cardName" style="color: var(--gold-light); font-family: var(--font-display); font-size: 1.2rem;">Apasă</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <p id="cardMessage" style="color: rgba(245,240,255,0.72); margin-top: 20px; min-height: 50px; font-size: 1.1rem;">
+      Apasă pe carte pentru a afla ce îți rezervă astrele astăzi...
+    </p>
+  </div>
+</section>
+
+<div class="sep">· · · ✦ · · ·</div>
 
 <!-- Zodiac strip -->
 <div class="zodiac-strip reveal">
@@ -940,6 +1020,41 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
+
+// ─── CARD OF THE DAY LOGIC ───
+const tarotDeck = [
+  { name: "Nebunul", icon: "🃏", message: "Un nou început te așteaptă. Fă un salt de credință, dar ai grijă unde aterizezi!" },
+  { name: "Magicianul", icon: "✨", message: "Ai toate uneltele necesare pentru a-ți manifesta dorințele. Acționează cu încredere." },
+  { name: "Marea Preoteasă", icon: "🌙", message: "Ascultă-ți intuiția profundă. Răspunsurile pe care le cauți se află deja în interiorul tău." },
+  { name: "Împărăteasa", icon: "👑", message: "O zi a creativității și abundenței. Hrănește-ți sufletul și bucură-te de frumusețea din jur." },
+  { name: "Împăratul", icon: "⛰️", message: "Este nevoie de structură și ordine astăzi. Preia controlul situației cu înțelepciune." },
+  { name: "Îndrăgostiții", icon: "💞", message: "O alegere importantă trebuie făcută din inimă, sau o conexiune profundă se va manifesta." },
+  { name: "Steaua", icon: "⭐", message: "Speranță, vindecare și inspirație. Universul te ghidează pe calea cea bună chiar acum." },
+  { name: "Soarele", icon: "☀️", message: "Bucurie absolută, succes și vitalitate. Totul se luminează în favoarea ta astăzi!" },
+  { name: "Luna", icon: "🐺", message: "Lucrurile pot părea confuze. Fii atent la iluzii și explorează-ți visele și subconștientul." },
+  { name: "Roata Norocului", icon: "🎡", message: "Norocul se schimbă. Fii pregătit pentru o surpriză plăcută și o schimbare de destin." }
+];
+
+function drawCard() {
+  const card = document.getElementById('dailyCard');
+  
+  // Pick a random card from the deck
+  const randomCard = tarotDeck[Math.floor(Math.random() * tarotDeck.length)];
+  
+  // Update the hidden back of the card
+  document.getElementById('cardIcon').innerText = randomCard.icon;
+  document.getElementById('cardName').innerText = randomCard.name;
+  
+  // Trigger the 3D flip animation
+  card.classList.add('flipped');
+  
+  // Wait half a second for the flip, then show the message
+  setTimeout(() => {
+    const msgElement = document.getElementById('cardMessage');
+    msgElement.innerText = randomCard.message;
+    msgElement.style.color = "#f0c96a"; // Turn it gold
+  }, 400);
+}
 
 </script>
 </body>
