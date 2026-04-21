@@ -461,10 +461,10 @@
     </a>
   </div>
 
-  <!-- Latest 5 videos -->
+  <!-- Latest videos -->
   <div id="latest-section" style="display:none">
     <div class="section-label">✦ Cele Mai Recente</div>
-    <div class="section-title">Ultimele 5 Videoclipuri</div>
+    <div class="section-title" id="latest-title">Ultimele 0 Videoclipuri</div>
     <div class="videos-grid featured" id="latest-grid"></div>
   </div>
 
@@ -477,10 +477,10 @@
     </button>
   </div>
 
-  <!-- Extra 25 videos (hidden until Show More) -->
+  <!-- Remaining videos (hidden until Show More) -->
   <div id="more-section">
     <div class="section-label">✦ Toate Videoclipurile</div>
-    <div class="section-title">Ultimele 30 de Videoclipuri</div>
+    <div class="section-title" id="more-title">Toate cele 0 Videoclipuri</div>
     <div class="videos-grid" id="more-grid"></div>
   </div>
 
@@ -531,22 +531,50 @@
     window.addEventListener('resize', () => { resize(); buildStars(); });
   })();
 
-  // ─── RSS FEED LOGIC ───
-  const CHANNEL_ID = 'UCdd5TEMnbcxdHsTBCe6ljAA';
-  const RSS_URL    = `https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`;
-  // We use a public CORS proxy to fetch the RSS from the browser
-  const PROXY      = `https://api.allorigins.win/get?url=${encodeURIComponent(RSS_URL)}`;
+  // ─── VIDEOS JSON LOGIC ───
+  const VIDEOS_JSON_URL = '/js/videos.json';
 
   let allVideos = [];
 
   function formatDate(dateStr) {
+    if (!dateStr) return 'Data indisponibila';
     const d = new Date(dateStr);
+    if (Number.isNaN(d.getTime())) return 'Data indisponibila';
     return d.toLocaleDateString('ro-RO', { day: 'numeric', month: 'long', year: 'numeric' });
   }
 
   function getVideoId(link) {
-    const m = link.match(/[?&]v=([^&]+)/);
-    return m ? m[1] : null;
+    if (!link) return null;
+
+    try {
+      const url = new URL(link);
+      const host = url.hostname.replace('www.', '');
+
+      // youtube.com/watch?v=VIDEO_ID
+      if (host === 'youtube.com' || host === 'm.youtube.com') {
+        const watchId = url.searchParams.get('v');
+        if (watchId) return watchId;
+
+        // youtube.com/shorts/VIDEO_ID or /embed/VIDEO_ID
+        const parts = url.pathname.split('/').filter(Boolean);
+        const markerIndex = parts.findIndex(p => p === 'shorts' || p === 'embed' || p === 'live');
+        if (markerIndex !== -1 && parts[markerIndex + 1]) {
+          return parts[markerIndex + 1];
+        }
+      }
+
+      // youtu.be/VIDEO_ID
+      if (host === 'youtu.be') {
+        const parts = url.pathname.split('/').filter(Boolean);
+        if (parts[0]) return parts[0];
+      }
+    } catch (_) {
+      // Fallback for malformed URLs
+    }
+
+    // Regex fallback for unusual links
+    const fallback = link.match(/(?:v=|youtu\.be\/|shorts\/|embed\/)([A-Za-z0-9_-]{6,})/);
+    return fallback ? fallback[1] : null;
   }
 
   function getThumbnail(videoId) {
@@ -585,47 +613,44 @@
     return card;
   }
 
-  function parseRSS(xml) {
-    const parser  = new DOMParser();
-    const doc     = parser.parseFromString(xml, 'application/xml');
-    const entries = doc.querySelectorAll('entry');
-    const videos  = [];
+  function normalizeVideos(payload) {
+    const items = Array.isArray(payload) ? payload : payload?.videos;
+    if (!Array.isArray(items)) return [];
 
-    entries.forEach(entry => {
-      const link        = entry.querySelector('link')?.getAttribute('href') || '';
-      const title       = entry.querySelector('title')?.textContent || '';
-      const published   = entry.querySelector('published')?.textContent || '';
-      const description = entry.querySelector('group > description')?.textContent?.trim() || '';
-
-      if (link && title) {
-        videos.push({ link, title, published, description });
-      }
-    });
-
-    return videos;
+    return items
+      .map(v => ({
+        link: String(v?.link || '').trim(),
+        title: String(v?.title || '').trim(),
+        published: String(v?.published || '').trim(),
+        description: String(v?.description || '').trim(),
+      }))
+      .filter(v => v.link && v.title);
   }
 
   async function loadVideos() {
     try {
-      const res  = await fetch(PROXY);
+      const res = await fetch(VIDEOS_JSON_URL, { cache: 'no-store' });
+      if (!res.ok) throw new Error(`Could not load videos.json (${res.status})`);
       const data = await res.json();
-
-      if (!data.contents) throw new Error('Empty response');
-
-      allVideos = parseRSS(data.contents);
+      allVideos = normalizeVideos(data);
 
       if (!allVideos.length) throw new Error('No videos found');
 
-      // Render latest 5
-      const latest     = allVideos.slice(0, 5);
+      const latestCount = Math.min(5, allVideos.length);
+      const moreCount = Math.min(30, allVideos.length);
+      document.getElementById('latest-title').textContent = `Ultimele ${latestCount} Videoclipuri`;
+      document.getElementById('more-title').textContent = `Ultimele ${moreCount} de Videoclipuri`;
+
+      // Render latest 5 (or fewer if file has less)
+      const latest     = allVideos.slice(0, latestCount);
       const latestGrid = document.getElementById('latest-grid');
 
       latest.forEach((v, i) => {
         latestGrid.appendChild(buildCard(v, i * 0.07));
       });
 
-      // Prepare more grid (videos 6–30)
-      const more     = allVideos.slice(5, 30);
+      // Prepare more grid (videos after first 5, up to the first 30 total)
+      const more     = allVideos.slice(latestCount, moreCount);
       const moreGrid = document.getElementById('more-grid');
 
       more.forEach((v, i) => {
@@ -643,7 +668,7 @@
       }
 
     } catch (err) {
-      console.error('RSS error:', err);
+      console.error('videos.json error:', err);
       document.getElementById('loader').style.display    = 'none';
       document.getElementById('error-box').style.display = 'block';
     }
