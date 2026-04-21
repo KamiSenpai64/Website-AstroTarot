@@ -1,4 +1,5 @@
 const MODAL_OPEN_CLASS = 'open';
+const SUCCESS_OPEN_CLASS = 'open';
 
 function getModalOverlay() {
   return document.getElementById('modalOverlay');
@@ -33,11 +34,16 @@ export function closeModalOutside(event) {
 export function closeSuccess() {
   const success = getSuccessOverlay();
   if (!success) return;
-  success.style.display = 'none';
+  success.classList.remove(SUCCESS_OPEN_CLASS);
+  document.body.style.overflow = '';
 }
 
 export function submitBooking() {
-  alert('✨ Mulțumesc! Te voi contacta în 24 de ore pentru a confirma lectura ta. Stelele te așteaptă.');
+  const success = getSuccessOverlay();
+  if (success) {
+    success.classList.add(SUCCESS_OPEN_CLASS);
+    document.body.style.overflow = 'hidden';
+  }
   closeModal();
 }
 
