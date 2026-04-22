@@ -228,23 +228,48 @@
 <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
   <div class="modal">
     <button class="modal-close" onclick="closeModal()">✕</button>
-    <div style="font-size:2rem; margin-bottom:12px">🔮</div>
+    <div class="modal-icon">🔮</div>
     <h2>Rezervă Lectura</h2>
     <p>Completează detaliile tale și te voi contacta în 24 de ore pentru a confirma ședința.</p>
     <input type="text" id="bookingName" placeholder="Numele Tău" />
     <input type="email" id="bookingEmail" placeholder="Adresa ta de Email" />
-    <label style="display:block; margin:10px 0 6px; color:#cfcfcf;">
-    Ora preferată (24h)
-    </label>
-
-    <input type="time" id="bookingTime" step="60">
+    <div class="time-field">
+      <label for="bookingTime">Ora preferată (24h)</label>
+      <select id="bookingTime" aria-label="Ora preferată">
+        <option value="">Alege ora preferată</option>
+        <option value="09:00">09:00</option>
+        <option value="09:30">09:30</option>
+        <option value="10:00">10:00</option>
+        <option value="10:30">10:30</option>
+        <option value="11:00">11:00</option>
+        <option value="11:30">11:30</option>
+        <option value="12:00">12:00</option>
+        <option value="12:30">12:30</option>
+        <option value="13:00">13:00</option>
+        <option value="13:30">13:30</option>
+        <option value="14:00">14:00</option>
+        <option value="14:30">14:30</option>
+        <option value="15:00">15:00</option>
+        <option value="15:30">15:30</option>
+        <option value="16:00">16:00</option>
+        <option value="16:30">16:30</option>
+        <option value="17:00">17:00</option>
+        <option value="17:30">17:30</option>
+        <option value="18:00">18:00</option>
+        <option value="18:30">18:30</option>
+        <option value="19:00">19:00</option>
+        <option value="19:30">19:30</option>
+        <option value="20:00">20:00</option>
+        <option value="20:30">20:30</option>
+      </select>
+      <small class="time-field-hint">Selectează un interval orientativ. Confirmarea finală vine prin email.</small>
+    </div>
     <textarea id="bookingNotes" placeholder="Întrebarea sau intenția ta pentru această lectură (opțional)…"></textarea>
-    <div class="price-badge" style="font-size:0.9rem; margin:0 0 18px">
-      <span class="price-amount" style="font-size:1.3rem">250 €</span>
+    <div class="price-badge modal-price-badge">
+      <span class="price-amount modal-price-amount">250 €</span>
       <span style="color:rgba(212,168,67,0.5)">·</span>
       <span class="price-detail">1 oră · Apel Video</span>
     </div>
-    <!-- ✏️ EDITEAZĂ: Înlocuiește cu adresa ta de email reală -->
     <button class="btn-submit" onclick="submitBooking()">Trimite Cererea de Rezervare ✦</button>
   </div>
 </div>

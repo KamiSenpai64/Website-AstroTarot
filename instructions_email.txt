@@ -1,57 +1,67 @@
-EMAIL SETUP INSTRUCTIONS (PHP BOOKING CONFIRMATION)
+EMAIL SETUP INSTRUCTIONS (GMAIL + PHPMailer)
 
-1) Update sender address in PHP
-- Open: backend/send_booking.php
-- Find:
-  $fromEmail = 'no-reply@example.com';
-  $fromName = 'Astro Tarot';
-- Replace with your real sender mailbox, for example:
-  $fromEmail = 'contact@domeniul-tau.ro';
-  $fromName = 'Astro Tarot';
+Current project status:
+- backend/send_booking.php now uses PHPMailer with SMTP.
+- Sender defaults:
+  - SMTP username: miuletdaniel@gmail.com
+  - From email: miuletdaniel@gmail.com
+  - From name: Astro Tarot
+  - Automatic BCC copy: miuletdaniel@gmail.com
 
-2) Use real domain DNS records (required for deliverability)
-- In your domain DNS add:
-  - SPF record that allows your mail provider/server
-  - DKIM record from your mail provider
-  - DMARC policy (recommended)
-- If SPF/DKIM are missing, many emails will go to spam or be rejected.
+1) Install dependency (required)
+- In project root run:
+  composer install
+- This will create vendor/autoload.php and install PHPMailer.
 
-3) Make sure your hosting can send email
-- The PHP mail() function requires a configured SMTP/MTA on the hosting server.
-- On shared hosting, this is usually preconfigured.
-- On VPS/Windows servers, configure SMTP service or use authenticated SMTP library (PHPMailer).
+2) Enable Google account prerequisites
+- Log into miuletdaniel@gmail.com.
+- Google Account > Security.
+- Turn ON 2-Step Verification.
+- Create App Password:
+  - Security > App passwords
+  - App: Mail
+  - Device: Other (example: AstroTarot Website)
+  - Copy and save the 16-character password.
 
-4) Recommended: use SMTP via PHPMailer for reliability
-- If mail() fails or lands in spam, switch to PHPMailer with SMTP credentials:
-  - SMTP host
-  - SMTP port (587 TLS or 465 SSL)
-  - SMTP username/password
-  - Sender email and name
-- This gives better delivery and clearer error reporting.
+3) Configure environment variables on hosting/server
+- SMTP_HOST=smtp.gmail.com
+- SMTP_PORT=587
+- SMTP_ENCRYPTION=tls
+- SMTP_USERNAME=miuletdaniel@gmail.com
+- SMTP_PASSWORD=YOUR_16_CHAR_APP_PASSWORD
+- SMTP_FROM_EMAIL=miuletdaniel@gmail.com
+- SMTP_FROM_NAME=Astro Tarot
+- SMTP_BCC_EMAIL=miuletdaniel@gmail.com
+- Alternative for local run: create backend/.env (copy from backend/.env.example) and fill values there.
 
-5) Deploy file structure
-- Keep this endpoint at:
-  /backend/send_booking.php
-- Frontend already calls:
-  fetch('backend/send_booking.php', ...)
+4) Local test in PowerShell (temporary for session)
+- $env:SMTP_HOST='smtp.gmail.com'
+- $env:SMTP_PORT='587'
+- $env:SMTP_ENCRYPTION='tls'
+- $env:SMTP_USERNAME='miuletdaniel@gmail.com'
+- $env:SMTP_PASSWORD='PUT_APP_PASSWORD_HERE'
+- $env:SMTP_FROM_EMAIL='miuletdaniel@gmail.com'
+- $env:SMTP_FROM_NAME='Astro Tarot'
+- $env:SMTP_BCC_EMAIL='miuletdaniel@gmail.com'
 
-6) Security checks already included
-- Required fields: name, email, preferred time
-- Email format validation
-- Only POST accepted
-- JSON response for frontend handling
+5) Production setup
+- Add the same variables in your hosting panel (Environment Variables).
+- Do NOT hardcode SMTP password in PHP file.
+- Do NOT commit password in git.
 
-7) Test flow
-- Open website and submit booking modal form.
-- Confirm success popup appears.
-- Check recipient inbox (and Spam/Junk folder).
-- If no email arrives:
-  - Check hosting PHP error logs
-  - Check mail server logs
-  - Verify SPF/DKIM/DMARC
-  - Verify sender mailbox exists and is authorized
+6) Test checklist
+- Submit booking modal from website.
+- Success popup should appear only if email sends successfully.
+- Confirm email arrives in inbox (also check Spam/Junk).
 
-8) Optional branding updates
-- In backend/send_booking.php edit email signature line:
-  [Numele tau / Brand]
-- Optionally replace Romanian text with your preferred wording.
+7) Troubleshooting
+- "Dependintele lipsesc. Ruleaza composer install." => run composer install in project root.
+- "Lipseste SMTP_PASSWORD..." => SMTP_PASSWORD not set in environment.
+- SMTP timeout/connection errors => hosting firewall blocks smtp.gmail.com:587 or 465.
+- 500 in PowerShell Invoke-RestMethod: print response body to see exact PHPMailer error text.
+
+8) Values you can send back so file can be finalized
+- Finalized:
+  - Brand display name: Astro Tarot
+  - Encryption/port: tls/587
+  - Fallback BCC copy: enabled to miuletdaniel@gmail.com

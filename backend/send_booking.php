@@ -3,6 +3,66 @@ declare(strict_types=1);
 
 header('Content-Type: application/json; charset=UTF-8');
 
+function loadEnvFile(string $filePath): void
+{
+    if (!file_exists($filePath)) {
+        return;
+    }
+
+    $lines = file($filePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    if ($lines === false) {
+        return;
+    }
+
+    foreach ($lines as $line) {
+        $trimmed = trim($line);
+        if ($trimmed === '' || str_starts_with($trimmed, '#')) {
+            continue;
+        }
+
+        $parts = explode('=', $trimmed, 2);
+        if (count($parts) !== 2) {
+            continue;
+        }
+
+        $key = trim($parts[0]);
+        $value = trim($parts[1]);
+
+        if ($key === '') {
+            continue;
+        }
+
+        if (
+            (str_starts_with($value, '"') && str_ends_with($value, '"')) ||
+            (str_starts_with($value, "'") && str_ends_with($value, "'"))
+        ) {
+            $value = substr($value, 1, -1);
+        }
+
+        if (getenv($key) === false) {
+            putenv("{$key}={$value}");
+            $_ENV[$key] = $value;
+            $_SERVER[$key] = $value;
+        }
+    }
+}
+
+loadEnvFile(__DIR__ . '/.env');
+
+if (!file_exists(__DIR__ . '/../vendor/autoload.php')) {
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'error' => 'Dependintele lipsesc. Ruleaza "composer install".'
+    ]);
+    exit;
+}
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+use PHPMailer\PHPMailer\Exception;
+use PHPMailer\PHPMailer\PHPMailer;
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode([
@@ -47,8 +107,23 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     exit;
 }
 
-$fromEmail = 'no-reply@example.com';
-$fromName = 'Astro Tarot';
+$smtpHost = getenv('SMTP_HOST') ?: 'smtp.gmail.com';
+$smtpPort = (int)(getenv('SMTP_PORT') ?: '587');
+$smtpUser = getenv('SMTP_USERNAME') ?: 'miuletdaniel@gmail.com';
+$smtpPass = getenv('SMTP_PASSWORD') ?: '';
+$smtpEncryption = getenv('SMTP_ENCRYPTION') ?: 'tls';
+$fromEmail = getenv('SMTP_FROM_EMAIL') ?: 'miuletdaniel@gmail.com';
+$fromName = getenv('SMTP_FROM_NAME') ?: 'Astro Tarot';
+$bccEmail = getenv('SMTP_BCC_EMAIL') ?: 'miuletdaniel@gmail.com';
+
+if ($smtpPass === '') {
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'error' => 'Lipseste SMTP_PASSWORD. Configureaza variabilele de mediu.'
+    ]);
+    exit;
+}
 
 $safeName = htmlspecialchars($name, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 $safeEmail = htmlspecialchars($email, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
@@ -74,21 +149,38 @@ $body .= "[Numele tau / Brand]\r\n\r\n";
 $body .= "---\r\n";
 $body .= "Acesta este un email automat. Te rugam sa nu raspunzi direct.\r\n";
 
-$headers = [
-    "MIME-Version: 1.0",
-    "Content-Type: text/plain; charset=UTF-8",
-    "From: {$fromName} <{$fromEmail}>",
-    "Reply-To: {$fromEmail}",
-    "X-Mailer: PHP/" . phpversion()
-];
+try {
+    $mailer = new PHPMailer(true);
+    $mailer->isSMTP();
+    $mailer->Host = $smtpHost;
+    $mailer->SMTPAuth = true;
+    $mailer->Username = $smtpUser;
+    $mailer->Password = $smtpPass;
+    $mailer->Port = $smtpPort;
 
-$sent = mail($email, $subject, $body, implode("\r\n", $headers));
+    if ($smtpEncryption === 'ssl') {
+        $mailer->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+    } else {
+        $mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+    }
 
-if (!$sent) {
+    $mailer->CharSet = 'UTF-8';
+    $mailer->setFrom($fromEmail, $fromName);
+    $mailer->addAddress($email, $name);
+    if ($bccEmail !== '') {
+        $mailer->addBCC($bccEmail);
+    }
+    $mailer->addReplyTo($fromEmail, $fromName);
+    $mailer->Subject = $subject;
+    $mailer->Body = $body;
+    $mailer->isHTML(false);
+
+    $mailer->send();
+} catch (Exception $exception) {
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'error' => 'Emailul nu a putut fi trimis. Verifica configurarea serverului.'
+        'error' => 'Emailul nu a putut fi trimis: ' . $exception->getMessage()
     ]);
     exit;
 }

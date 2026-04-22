@@ -43,6 +43,7 @@ export function submitBooking() {
   const emailInput = document.getElementById('bookingEmail');
   const timeInput = document.getElementById('bookingTime');
   const notesInput = document.getElementById('bookingNotes');
+  const submitButton = document.querySelector('.btn-submit');
 
   const name = nameInput?.value?.trim() ?? '';
   const email = emailInput?.value?.trim() ?? '';
@@ -60,6 +61,11 @@ export function submitBooking() {
     preferredTime,
     notes
   };
+
+  if (submitButton instanceof HTMLButtonElement) {
+    submitButton.disabled = true;
+    submitButton.textContent = 'Se trimite...';
+  }
 
   fetch('backend/send_booking.php', {
     method: 'POST',
@@ -90,6 +96,12 @@ export function submitBooking() {
     })
     .catch((error) => {
       window.alert(error.message || 'Nu am putut trimite cererea. Incearca din nou.');
+    })
+    .finally(() => {
+      if (submitButton instanceof HTMLButtonElement) {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Trimite Cererea de Rezervare ✦';
+      }
     });
 }
 
