@@ -721,7 +721,7 @@ footer {
 
   .hero {
     min-height: auto;
-    padding: 46px 18px 58px;
+    padding: 96px 18px 58px;
   }
 
   .hero-desc {
@@ -773,6 +773,10 @@ footer {
   .zodiac-strip {
     gap: 12px;
     padding: 8px 10px 34px;
+  }
+
+  .hero {
+    padding-top: 132px;
   }
 
   .zodiac-glyph {

@@ -47,7 +47,7 @@
       border-bottom: 1px solid rgba(212,168,67,0.2);
       display: flex; gap: 24px; justify-content: center;
       padding: 16px 24px; font-family: var(--font-display);
-      font-size: 0.6rem; letter-spacing: 0.2em;
+      font-size: 0.6rem; letter-spacing: 0.2em; flex-wrap: wrap;
     }
     nav a { color: var(--rose); text-decoration: none; transition: 0.3s; }
     nav a:hover { color: var(--gold-light); }
@@ -56,15 +56,15 @@
     .content-wrapper {
       position: relative;
       z-index: 1;
-      margin-top: 120px;
+      margin-top: 112px;
       text-align: center;
-      padding: 20px;
-      max-width: 600px;
+      padding: 18px 20px 26px;
+      max-width: 520px;
     }
 
     .page-title {
       font-family: var(--font-display);
-      font-size: 2.5rem;
+      font-size: clamp(1.9rem, 5vw, 2.3rem);
       background: linear-gradient(90deg, var(--gold-light), var(--rose));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -74,9 +74,9 @@
     /* --- TAROT CARD 3D --- */
     .tarot-draw-container {
       perspective: 1000px;
-      width: 220px;
-      height: 380px;
-      margin: 40px auto;
+      width: 190px;
+      height: 312px;
+      margin: 24px auto 18px;
       cursor: pointer;
     }
 
@@ -149,7 +149,7 @@
       opacity: 0;
       transform: translateY(20px);
       transition: 0.8s ease;
-      margin-top: 20px;
+      margin-top: 14px;
     }
 
     #message-box.visible {
@@ -158,18 +158,18 @@
     }
 
     .interpretation {
-      font-size: 1.3rem;
-      line-height: 1.6;
+      font-size: 1.12rem;
+      line-height: 1.45;
       color: var(--gold-pale);
       font-style: italic;
     }
 
     .btn-refresh {
-      margin-top: 30px;
+      margin-top: 18px;
       background: none;
       border: 1px solid var(--gold);
       color: var(--gold);
-      padding: 10px 25px;
+      padding: 10px 22px;
       font-family: var(--font-display);
       cursor: pointer;
       border-radius: 50px;
@@ -178,17 +178,51 @@
 
     .btn-refresh:hover { background: var(--gold); color: var(--midnight); }
 
+    @media (max-width: 760px) {
+      .content-wrapper {
+        margin-top: 126px;
+        max-width: 440px;
+        padding: 14px 14px 24px;
+      }
+
+      .tarot-draw-container {
+        width: 160px;
+        height: 264px;
+        margin: 16px auto 12px;
+      }
+
+      .card-pattern {
+        font-size: 2.2rem;
+      }
+
+      .card-name-overlay {
+        padding: 14px 8px 8px;
+        font-size: 0.7rem;
+      }
+
+      .interpretation {
+        font-size: 1rem;
+        line-height: 1.4;
+      }
+
+      .btn-refresh {
+        margin-top: 14px;
+        width: 100%;
+        max-width: 260px;
+      }
+    }
+
   </style>
 </head>
 <body>
 
   <nav>
-    <a href="index.html">✦ ACASĂ</a>
+    <a href="/index.html" style="color: var(--gold-light)">✦ Acasă</a>
     <a href="/videos.html">▶ Videos</a>
-    <a href="/zodiac/zodiac.html">♈ ZODIAC</a>
-    <a href="mesaj.html" style="color: var(--gold-light)">✨ MESAJ</a>
-    <a href="index.html#lectura">🎴 LECTURĂ</a>
-    <a href="index.html#despre">🌙 DESPRE</a>
+    <a href="/zodiac/zodiac.html">♈ Zodiac</a>
+    <a href="/mesaj.html">✨ Mesaj</a>
+    <a href="/index.html#lectura">🎴 Lectură</a>
+    <a href="/index.html#despre">🌙 Despre</a>
   </nav>
 
   <canvas id="stars-canvas"></canvas>
