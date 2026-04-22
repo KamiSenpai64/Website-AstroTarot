@@ -1,0 +1,57 @@
+EMAIL SETUP INSTRUCTIONS (PHP BOOKING CONFIRMATION)
+
+1) Update sender address in PHP
+- Open: backend/send_booking.php
+- Find:
+  $fromEmail = 'no-reply@example.com';
+  $fromName = 'Astro Tarot';
+- Replace with your real sender mailbox, for example:
+  $fromEmail = 'contact@domeniul-tau.ro';
+  $fromName = 'Astro Tarot';
+
+2) Use real domain DNS records (required for deliverability)
+- In your domain DNS add:
+  - SPF record that allows your mail provider/server
+  - DKIM record from your mail provider
+  - DMARC policy (recommended)
+- If SPF/DKIM are missing, many emails will go to spam or be rejected.
+
+3) Make sure your hosting can send email
+- The PHP mail() function requires a configured SMTP/MTA on the hosting server.
+- On shared hosting, this is usually preconfigured.
+- On VPS/Windows servers, configure SMTP service or use authenticated SMTP library (PHPMailer).
+
+4) Recommended: use SMTP via PHPMailer for reliability
+- If mail() fails or lands in spam, switch to PHPMailer with SMTP credentials:
+  - SMTP host
+  - SMTP port (587 TLS or 465 SSL)
+  - SMTP username/password
+  - Sender email and name
+- This gives better delivery and clearer error reporting.
+
+5) Deploy file structure
+- Keep this endpoint at:
+  /backend/send_booking.php
+- Frontend already calls:
+  fetch('backend/send_booking.php', ...)
+
+6) Security checks already included
+- Required fields: name, email, preferred time
+- Email format validation
+- Only POST accepted
+- JSON response for frontend handling
+
+7) Test flow
+- Open website and submit booking modal form.
+- Confirm success popup appears.
+- Check recipient inbox (and Spam/Junk folder).
+- If no email arrives:
+  - Check hosting PHP error logs
+  - Check mail server logs
+  - Verify SPF/DKIM/DMARC
+  - Verify sender mailbox exists and is authorized
+
+8) Optional branding updates
+- In backend/send_booking.php edit email signature line:
+  [Numele tau / Brand]
+- Optionally replace Romanian text with your preferred wording.

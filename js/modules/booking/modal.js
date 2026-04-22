@@ -39,12 +39,58 @@ export function closeSuccess() {
 }
 
 export function submitBooking() {
-  const success = getSuccessOverlay();
-  if (success) {
-    success.classList.add(SUCCESS_OPEN_CLASS);
-    document.body.style.overflow = 'hidden';
+  const nameInput = document.getElementById('bookingName');
+  const emailInput = document.getElementById('bookingEmail');
+  const timeInput = document.getElementById('bookingTime');
+  const notesInput = document.getElementById('bookingNotes');
+
+  const name = nameInput?.value?.trim() ?? '';
+  const email = emailInput?.value?.trim() ?? '';
+  const preferredTime = timeInput?.value?.trim() ?? '';
+  const notes = notesInput?.value?.trim() ?? '';
+
+  if (!name || !email || !preferredTime) {
+    window.alert('Te rog completeaza numele, adresa de email si ora preferata.');
+    return;
   }
-  closeModal();
+
+  const payload = {
+    name,
+    email,
+    preferredTime,
+    notes
+  };
+
+  fetch('backend/send_booking.php', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  })
+    .then(async (response) => {
+      let responseData = {};
+      try {
+        responseData = await response.json();
+      } catch (error) {
+        responseData = {};
+      }
+
+      if (!response.ok || !responseData.success) {
+        throw new Error(responseData.error || 'A aparut o eroare la trimiterea emailului.');
+      }
+
+      const success = getSuccessOverlay();
+      if (success) {
+        success.classList.add(SUCCESS_OPEN_CLASS);
+        document.body.style.overflow = 'hidden';
+      }
+
+      closeModal();
+    })
+    .catch((error) => {
+      window.alert(error.message || 'Nu am putut trimite cererea. Incearca din nou.');
+    });
 }
 
 export function registerModalGlobals() {
